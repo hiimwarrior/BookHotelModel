@@ -1,0 +1,13 @@
+data/raw/
+data/processed/
+
+# Ignore DVC files
+*.dvc
+.dvc/
+
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+
+# Ignore environment files
+.env

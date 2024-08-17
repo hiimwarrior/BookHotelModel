@@ -1,0 +1,14 @@
+# api/deployment/docker-compose.local.yml
+version: '3.8'
+
+services:
+  fastapi:
+    build:
+      context: ../
+      dockerfile: api/deployment/Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      - PORT=80
+    volumes:
+      - ../:/app

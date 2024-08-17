@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python data_engineering/src/utils/get_dvc_dataset.py hotel_bookings
+    deps:
+    - path: data_engineering/src/utils/data.py
+      hash: md5
+      md5: f056b44c05bc4fd9c15a4475cf706592
+      size: 1012
+    - path: data_engineering/src/utils/get_dvc_dataset.py
+      hash: md5
+      md5: 9d4724bb24f134121d88cf2429c307e6
+      size: 542
+    outs:
+    - path: data/raw/hotel_bookings.csv
+      hash: md5
+      md5: 3012c636a5fc07daab80f41a901297a3
+      size: 16726955

@@ -1,0 +1,11 @@
+mlruns/
+*.joblib
+*.csv
+*.json
+*.yaml
+*.yml
+
+*.log
+*.tmp
+*.swp
+*.DS_Store

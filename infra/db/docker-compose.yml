@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mysql_hotel_booking_prod
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    volumes:
+      - ../volumes/db/prod:/var/lib/mysql
+    networks:
+      - hotel_booking_net
+
+networks:
+  hotel_booking_net:
+    driver: bridge

@@ -1,0 +1,6 @@
+# Exclude directories and files
+exclude = [
+    "data_engineering/src/experiments/**/*",
+    "api/src/experiments/**/*",
+    "data_science/src/experiments/**/*"
+]
