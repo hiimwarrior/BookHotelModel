@@ -1,0 +1,7 @@
+stages:
+  download:
+    cmd: python src/data_download.py
+    deps:
+      - src/data_download.py
+    outs:
+      - data/raw/hotel_bookings.csv
