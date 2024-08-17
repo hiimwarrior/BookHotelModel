@@ -1,7 +1,7 @@
 stages:
   download:
-    cmd: python data_engineering/src/data_download.py
+    cmd: python data_engineering/src/utils/data_download.py
     deps:
-      - data_engineering/src/data_download.py
+      - data_engineering/src/utils/data_download.py
     outs:
       - data/raw/hotel_bookings.csv
