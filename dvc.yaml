@@ -2,7 +2,7 @@ stages:
   download:
     cmd: python data_engineering/src/utils/get_dvc_dataset.py hotel_bookings
     deps:
-      - src/utils/get_dvc_dataset.py
-      - src/utils/data_download.py
+      - data_engineering/src/utils/get_dvc_dataset.py
+      - data_engineering/src/utils/data_download.py
     outs:
       - data/raw/hotel_bookings.csv
