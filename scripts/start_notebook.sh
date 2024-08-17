@@ -32,6 +32,7 @@ fi
 
 echo "Activating virtual environment in $venv_dir..."
 source "$venv_dir/bin/activate"
+source "$venv_dir/Scripts/activate"  # Windows, uncomment if needed
 
 # Install dependencies from the requirements.txt file
 if [ -f "$requirements_file" ]; then
