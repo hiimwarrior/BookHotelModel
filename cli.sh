@@ -13,6 +13,7 @@ show_help() {
     echo "  lint [DIRECTORY]       Run linting checks using ruff on the specified directory (api, data_science, data_engineering or all directories)"
     echo "  test [DIRECTORY]       Run tests in the specified directory (api, data_engineering, data_science)"
     echo "  start-mlflow-ui        Start the MLflow UI server"
+    echo "  start-notebook [ds|de]         Start a Jupyter Notebook in the specified directory (data_science or data_engineering)."
     echo
     echo "Options:"
     echo "  -h, --help             Show this help message and exit"
@@ -178,6 +179,14 @@ case $1 in
         ;;
     -h|--help)
         show_help
+        ;;
+    start-notebook)
+        echo "Starting Jupyter Notebook..."
+        if [ $# -ne 2 ]; then
+            echo "Error: start-notebook requires exactly one argument ('ds' for data_science or 'de' for data_engineering)."
+            exit 1
+        fi
+        ./scripts/start_notebook.sh "$2"
         ;;
     *)
         echo "Error: Invalid command '$1'."
