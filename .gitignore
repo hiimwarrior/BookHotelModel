@@ -41,3 +41,5 @@ Desktop.ini
 .git/
 .hg/
 .svn/
+.pytest_cache/
+.ruff_cache/
