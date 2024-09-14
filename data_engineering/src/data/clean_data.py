@@ -19,41 +19,6 @@ def process_data():
     df['children'] = df['children'].fillna(df.children.mode()[0])
     df.isnull().sum().sort_values(ascending=False)
 
-    df_transformado = df.astype({
-        'hotel': 'category',
-        'is_canceled': 'int64',
-        'lead_time': 'int64',
-        'arrival_date_year': 'category',
-        'arrival_date_month': 'category',
-        'arrival_date_week_number': 'int64',
-        'arrival_date_day_of_month': 'int64',
-        'stays_in_weekend_nights': 'int64',
-        'stays_in_week_nights': 'int64',
-        'adults': 'int64',
-        'children': 'int64',
-        'babies': 'int64',
-        'meal': 'category',
-        'country': 'category',
-        'market_segment': 'category',
-        'distribution_channel': 'category',
-        'is_repeated_guest': 'category',
-        'previous_cancellations': 'int64',
-        'previous_bookings_not_canceled': 'int64',
-        'reserved_room_type': 'category',
-        'assigned_room_type': 'category',
-        'booking_changes': 'int64',
-        'deposit_type': 'category',
-        'agent': 'category',
-        'company': 'category',
-        'days_in_waiting_list': 'int64',
-        'customer_type': 'category',
-        'adr': 'float',
-        'required_car_parking_spaces': 'int64',
-        'total_of_special_requests': 'int64',
-        'reservation_status': 'category',
-        'reservation_status_date': 'datetime64[ns]'
-    })
-
     # Crear una columna de fecha completa
     df['arrival_date'] = pd.to_datetime(df['arrival_date_year'].astype(str) + '-' + 
                                         df['arrival_date_month'].astype(str) + '-' + 
@@ -102,7 +67,7 @@ def process_data():
     df['customer_season'] = df['customer_type'] + '_' + df['season']
 
     # Ratio de ADR respecto al promedio de ADR para ese tipo de habitación
-    df['adr_ratio'] = df['adr'] / df['avg_adr_for_room_type']
+    # df['adr_ratio'] = df['adr'] / df['avg_adr_for_room_type']
 
     # Diferencia entre la fecha de reserva y la fecha de llegada (lead time en días)
     df['booking_date'] = df['arrival_date'] - pd.to_timedelta(df['lead_time'], unit='D')
@@ -119,7 +84,58 @@ def process_data():
     high_season_months = [6, 7, 8, 12]  # Ejemplo: verano y diciembre
     df['is_high_season'] = df['arrival_month'].isin(high_season_months).astype(int)
 
-    return df
+    df_transformado = df.astype({
+        'hotel': 'category',
+        'is_canceled': 'int64',
+        'lead_time': 'int64',
+        'arrival_date_year': 'category',
+        'arrival_date_month': 'category',
+        'arrival_date_week_number': 'int64',
+        'arrival_date_day_of_month': 'int64',
+        'stays_in_weekend_nights': 'int64',
+        'stays_in_week_nights': 'int64',
+        'adults': 'int64',
+        'children': 'int64',
+        'babies': 'int64',
+        'meal': 'category',
+        'country': 'category',
+        'market_segment': 'category',
+        'distribution_channel': 'category',
+        'is_repeated_guest': 'category',
+        'previous_cancellations': 'int64',
+        'previous_bookings_not_canceled': 'int64',
+        'reserved_room_type': 'category',
+        'assigned_room_type': 'category',
+        'booking_changes': 'int64',
+        'deposit_type': 'category',
+        'agent': 'category',
+        'company': 'category',
+        'days_in_waiting_list': 'int64',
+        'customer_type': 'category',
+        'adr': 'float',
+        'required_car_parking_spaces': 'int64',
+        'total_of_special_requests': 'int64',
+        'reservation_status': 'category',
+        'reservation_status_date': 'datetime64[ns]',
+        'arrival_date': 'datetime64[ns]',
+        'arrival_day_of_week': 'int64',
+        'arrival_month': 'int64',
+        'season': 'category',
+        'is_weekend': 'int64',
+        'total_nights': 'int64',
+        'customer_type_cancellation_rate': 'float64',
+        'avg_adr_for_room_type': 'float64',
+        'total_guests': 'int64',
+        'room_season': 'category',
+        'customer_season': 'category',
+        'booking_date': 'datetime64[ns]',
+        'booking_to_arrival_weeks': 'int64',
+        'is_last_minute': 'int64',
+        'total_special_requests': 'int64',
+        'is_high_season': 'int64'
+    })
+
+    return df_transformado
 
 # Function to save data to CSV
 def save_to_csv(df, file_path='data/processed/clean_hotel_bookings.csv'):
