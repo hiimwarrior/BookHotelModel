@@ -3,22 +3,18 @@ import argparse
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 import os
-import sys
-
-from datetime import datetime
 
 # Function to process and clean data
 def process_data():
-    # Load the raw dataset
+    # Cargar el dataset crudo
     df = pd.read_csv('data/raw/hotel_bookings.csv', parse_dates=['reservation_status_date'])
 
-    # Data cleaning process
+    # Proceso de limpieza de datos
     df[['agent','company']] = df[['agent','company']].fillna(0)
-    df.isnull().sum().sort_values(ascending=False)
     df['country'] = df['country'].fillna(df.country.mode()[0])
     df['children'] = df['children'].fillna(df.children.mode()[0])
-    df.isnull().sum().sort_values(ascending=False)
 
+    # Tipos de datos transformados
     df_transformado = df.astype({
         'hotel': 'category',
         'is_canceled': 'int64',
@@ -39,7 +35,7 @@ def process_data():
         'is_repeated_guest': 'category',
         'previous_cancellations': 'int64',
         'previous_bookings_not_canceled': 'int64',
-        'reserved_room_type': 'category',
+        'reserved_room_type': 'str',
         'assigned_room_type': 'category',
         'booking_changes': 'int64',
         'deposit_type': 'category',
@@ -54,18 +50,18 @@ def process_data():
         'reservation_status_date': 'datetime64[ns]'
     })
 
-    # Crear una columna de fecha completa
-    df['arrival_date'] = pd.to_datetime(df['arrival_date_year'].astype(str) + '-' + 
-                                        df['arrival_date_month'].astype(str) + '-' + 
-                                        df['arrival_date_day_of_month'].astype(str))
+    # Crear la columna de fecha completa
+    df_transformado['arrival_date'] = pd.to_datetime(df_transformado['arrival_date_year'].astype(str) + '-' + 
+                                        df_transformado['arrival_date_month'].astype(str) + '-' + 
+                                        df_transformado['arrival_date_day_of_month'].astype(str))
 
-    # Día de la semana
-    df['arrival_day_of_week'] = df['arrival_date'].dt.dayofweek
+    # Día de la semana de llegada
+    df_transformado['arrival_day_of_week'] = df_transformado['arrival_date'].dt.dayofweek
 
-    # Mes
-    df['arrival_month'] = df['arrival_date'].dt.month
+    # Mes de llegada
+    df_transformado['arrival_month'] = df_transformado['arrival_date'].dt.month
 
-    # Temporada (ejemplo simple, ajusta según las temporadas específicas del hotel)
+    # Definir las estaciones del año
     def get_season(month):
         if month in [12, 1, 2]:
             return 'Invierno'
@@ -76,50 +72,49 @@ def process_data():
         else:
             return 'Otoño'
 
-    df['season'] = df['arrival_month'].apply(get_season)
+    df_transformado['season'] = df_transformado['arrival_month'].apply(get_season)
 
-    # Es fin de semana
-    df['is_weekend'] = df['arrival_day_of_week'].isin([5, 6]).astype(int)
+    # Indicador de fin de semana
+    df_transformado['is_weekend'] = df_transformado['arrival_day_of_week'].isin([5, 6]).astype(int)
 
-    # Promedio de estancia
-    df['total_nights'] = df['stays_in_weekend_nights'] + df['stays_in_week_nights']
+    # Total de noches
+    df_transformado['total_nights'] = df_transformado['stays_in_weekend_nights'] + df_transformado['stays_in_week_nights']
 
     # Tasa de cancelación por tipo de cliente
-    cancellation_rate = df.groupby('customer_type')['is_canceled'].mean()
-    df['customer_type_cancellation_rate'] = df['customer_type'].map(cancellation_rate)
+    cancellation_rate = df_transformado.groupby('customer_type')['is_canceled'].mean()
+    df_transformado['customer_type_cancellation_rate'] = df_transformado['customer_type'].map(cancellation_rate)
 
     # Promedio de ADR por tipo de habitación
-    avg_adr_by_room = df.groupby('reserved_room_type')['adr'].mean()
-    df['avg_adr_for_room_type'] = df['reserved_room_type'].map(avg_adr_by_room)
+    avg_adr_by_room = df_transformado.groupby('reserved_room_type')['adr'].mean()
+    df_transformado['avg_adr_for_room_type'] = df_transformado['reserved_room_type'].map(avg_adr_by_room)
 
     # Total de huéspedes
-    df['total_guests'] = df['adults'] + df['children'] + df['babies']
+    df_transformado['total_guests'] = df_transformado['adults'] + df_transformado['children'] + df_transformado['babies']
 
     # Interacción entre tipo de habitación y temporada
-    df['room_season'] = df['reserved_room_type'] + '_' + df['season']
+    df_transformado['room_season'] = df_transformado['reserved_room_type'] + '_' + df_transformado['season']
 
     # Interacción entre tipo de cliente y temporada
-    df['customer_season'] = df['customer_type'] + '_' + df['season']
+    df_transformado['customer_season'] = df_transformado['customer_type'].astype(str) + '_' + df_transformado['season'].astype(str)
 
     # Ratio de ADR respecto al promedio de ADR para ese tipo de habitación
-    df['adr_ratio'] = df['adr'] / df['avg_adr_for_room_type']
+    df_transformado['adr_ratio'] = df_transformado['adr'] / df_transformado['avg_adr_for_room_type']
 
     # Diferencia entre la fecha de reserva y la fecha de llegada (lead time en días)
-    df['booking_date'] = df['arrival_date'] - pd.to_timedelta(df['lead_time'], unit='D')
-    df['booking_to_arrival_weeks'] = (df['arrival_date'] - df['booking_date']).dt.days // 7
+    df_transformado['booking_date'] = df_transformado['arrival_date'] - pd.to_timedelta(df_transformado['lead_time'], unit='D')
+    df_transformado['booking_to_arrival_weeks'] = (df_transformado['arrival_date'] - df_transformado['booking_date']).dt.days // 7
 
+    # Es una reserva de última hora
+    df_transformado['is_last_minute'] = (df_transformado['lead_time'] < 7).astype(int)
 
-    # Es una reserva de última hora (por ejemplo, menos de 7 días de antelación)pwd
-    df['is_last_minute'] = (df['lead_time'] < 7).astype(int)
+    # Total de servicios especiales solicitados
+    df_transformado['total_special_requests'] = df_transformado['required_car_parking_spaces'] + df_transformado['total_of_special_requests']
 
-    # Número total de servicios especiales solicitados
-    df['total_special_requests'] = df['required_car_parking_spaces'] + df['total_of_special_requests']
+    # Es temporada alta
+    high_season_months = [6, 7, 8, 12]
+    df_transformado['is_high_season'] = df_transformado['arrival_month'].isin(high_season_months).astype(int)
 
-    # Es temporada alta (puedes definir los meses de temporada alta según el patrón del hotel)
-    high_season_months = [6, 7, 8, 12]  # Ejemplo: verano y diciembre
-    df['is_high_season'] = df['arrival_month'].isin(high_season_months).astype(int)
-
-    return df
+    return df_transformado
 
 # Function to save data to CSV
 def save_to_csv(df, file_path='data/processed/clean_hotel_bookings.csv'):
