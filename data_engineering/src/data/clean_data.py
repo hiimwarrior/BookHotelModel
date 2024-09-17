@@ -3,34 +3,29 @@ import argparse
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 import os
-import sys
-
-from datetime import datetime
 
 # Function to process and clean data
 def process_data():
-    # Load the raw dataset
+    # Cargar el dataset crudo
     df = pd.read_csv('data/raw/hotel_bookings.csv', parse_dates=['reservation_status_date'])
 
-    # Data cleaning process
+    # Proceso de limpieza de datos
     df[['agent','company']] = df[['agent','company']].fillna(0)
-    df.isnull().sum().sort_values(ascending=False)
     df['country'] = df['country'].fillna(df.country.mode()[0])
     df['children'] = df['children'].fillna(df.children.mode()[0])
-    df.isnull().sum().sort_values(ascending=False)
 
     # Crear una columna de fecha completa
     df['arrival_date'] = pd.to_datetime(df['arrival_date_year'].astype(str) + '-' + 
                                         df['arrival_date_month'].astype(str) + '-' + 
                                         df['arrival_date_day_of_month'].astype(str))
 
-    # Día de la semana
+    # Día de la semana de llegada
     df['arrival_day_of_week'] = df['arrival_date'].dt.dayofweek
 
-    # Mes
+    # Mes de llegada
     df['arrival_month'] = df['arrival_date'].dt.month
 
-    # Temporada (ejemplo simple, ajusta según las temporadas específicas del hotel)
+    # Definir las estaciones del año
     def get_season(month):
         if month in [12, 1, 2]:
             return 'Invierno'
@@ -43,10 +38,10 @@ def process_data():
 
     df['season'] = df['arrival_month'].apply(get_season)
 
-    # Es fin de semana
+    # Indicador de fin de semana
     df['is_weekend'] = df['arrival_day_of_week'].isin([5, 6]).astype(int)
 
-    # Promedio de estancia
+    # Total de noches
     df['total_nights'] = df['stays_in_weekend_nights'] + df['stays_in_week_nights']
 
     # Tasa de cancelación por tipo de cliente
@@ -64,25 +59,26 @@ def process_data():
     df['room_season'] = df['reserved_room_type'] + '_' + df['season']
 
     # Interacción entre tipo de cliente y temporada
-    df['customer_season'] = df['customer_type'] + '_' + df['season']
+    df['customer_season'] = df['customer_type'].astype(str) + '_' + df['season'].astype(str)
 
     # Ratio de ADR respecto al promedio de ADR para ese tipo de habitación
-    # df['adr_ratio'] = df['adr'] / df['avg_adr_for_room_type']
+
+    df['adr_ratio'] = df['adr'] / df['avg_adr_for_room_type']
 
     # Diferencia entre la fecha de reserva y la fecha de llegada (lead time en días)
     df['booking_date'] = df['arrival_date'] - pd.to_timedelta(df['lead_time'], unit='D')
     df['booking_to_arrival_weeks'] = (df['arrival_date'] - df['booking_date']).dt.days // 7
 
-
-    # Es una reserva de última hora (por ejemplo, menos de 7 días de antelación)pwd
+    # Es una reserva de última hora
     df['is_last_minute'] = (df['lead_time'] < 7).astype(int)
 
-    # Número total de servicios especiales solicitados
+    # Total de servicios especiales solicitados
     df['total_special_requests'] = df['required_car_parking_spaces'] + df['total_of_special_requests']
 
-    # Es temporada alta (puedes definir los meses de temporada alta según el patrón del hotel)
-    high_season_months = [6, 7, 8, 12]  # Ejemplo: verano y diciembre
-    df['is_high_season'] = df['arrival_month'].isin(high_season_months).astype(int)
+    # Es temporada alta
+    high_season_months = [6, 7, 8, 12]
+    df['is_high_season'] = df['arrival_month'].isin(df).astype(int)
+
 
     df_transformado = df.astype({
         'hotel': 'category',
