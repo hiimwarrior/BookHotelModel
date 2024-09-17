@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from clean_data import process_data
+from src.data.clean_data import process_data
 
 # Test para verificar si el procesamiento de los datos es correcto
 def test_process_data():

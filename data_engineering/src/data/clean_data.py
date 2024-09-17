@@ -6,8 +6,11 @@ import os
 
 # Function to process and clean data
 def process_data():
-    # Cargar el dataset crudo
-    df = pd.read_csv('data/raw/hotel_bookings.csv', parse_dates=['reservation_status_date'])
+    dataset_filename="hotel_bookings.csv"
+    base_dir = os.path.dirname(__file__)
+    # Construye la ruta absoluta hacia el archivo de datos
+    data_path = os.path.abspath(os.path.join(base_dir, '../../../data/raw', dataset_filename))
+    df = pd.read_csv(data_path, parse_dates=['reservation_status_date'])
 
     # Proceso de limpieza de datos
     df[['agent','company']] = df[['agent','company']].fillna(0)

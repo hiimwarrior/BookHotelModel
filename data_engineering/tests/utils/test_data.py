@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, mock_open
-from data import download_dataset
+from src.utils.file import download_dataset
 
 class TestDownloadDataset(unittest.TestCase):
     
@@ -11,7 +11,7 @@ class TestDownloadDataset(unittest.TestCase):
         mock_get.return_value.content = b'some data'
         
         dataset_key = 'test_dataset'
-        with patch.dict('config.DATASETS', {
+        with patch.dict('src.utils.config.DATASETS', {
             dataset_key: {
                 'url': 'http://example.com/test.csv',
                 'destination': 'data/raw/test.csv'
@@ -26,7 +26,7 @@ class TestDownloadDataset(unittest.TestCase):
         mock_get.return_value.status_code = 404
         
         dataset_key = 'test_dataset'
-        with patch.dict('config.DATASETS', {
+        with patch.dict('src.utils.config.DATASETS', {
             dataset_key: {
                 'url': 'http://example.com/test.csv',
                 'destination': 'data/raw/test.csv'

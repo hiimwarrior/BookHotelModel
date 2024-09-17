@@ -2,6 +2,7 @@ import argparse
 from utils.db import save_to_db
 from utils.file import is_csv_empty, save_to_csv
 from transformations.process_bookings_data_v1 import process_bookings_data_v1
+import os
 
 def main():
     parser = argparse.ArgumentParser(
@@ -25,8 +26,11 @@ def main():
 
     # Save the data based on the destination parameter
     if args.destination == "csv":
-        if is_csv_empty("../data/processed/clean_hotel_bookings.csv"):
-            save_to_csv(transformed_df)
+        dataset_filename="clean_hotel_bookings_v1.csv"
+        base_dir = os.path.dirname(__file__)
+        data_path = os.path.abspath(os.path.join(base_dir, '../../data/processed', dataset_filename))
+        if is_csv_empty(data_path):
+            save_to_csv(transformed_df, data_path)
         else:
             print("CSV file already contains data. No new data saved.")
     elif args.destination == "db":

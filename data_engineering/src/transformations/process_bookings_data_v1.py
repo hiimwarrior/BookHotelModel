@@ -1,18 +1,25 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from utils.file import load_schema
+from src.utils.file import load_schema
+import os
 
 # Function to process and clean data
 def process_bookings_data_v1():
     schema_path = 'data/schemas/hotel_bookings/hotel_bookings_schema_v1.json'
     hotel_bookings_schema_v1 = load_schema(schema_path)
     # Load the raw dataset
-    transformed_df = pd.read_csv("../data/raw/hotel_bookings.csv")
-
+    dataset_filename="hotel_bookings.csv"
+    base_dir = os.path.dirname(__file__)
+    data_path = os.path.abspath(os.path.join(base_dir, '../../../data/raw', dataset_filename))
+    transformed_df = pd.read_csv(data_path)
+    
     # Fill NA
     transformed_df[["agent", "company"]] = transformed_df[["agent", "company"]].fillna(0)
     transformed_df["country"] = transformed_df["country"].fillna(transformed_df.country.mode()[0])
     transformed_df["children"] = transformed_df["children"].fillna(transformed_df.children.mode()[0])
+    # transformed_df['required_car_parking_spaces'] = transformed_df['required_car_parking_spaces'].fillna(0).astype('int64')
+    # transformed_df['total_of_special_requests'] = transformed_df['total_of_special_requests'].fillna(0).astype('int64')
+    
     transformed_df.isnull().sum().sort_values(ascending=False)
     
     # Transform the transformed_df to the proper data types
