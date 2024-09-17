@@ -8,7 +8,7 @@ def test_save_model():
     
     save_model(model, model_name, version)
     
-    model_path = os.path.join("model_output", model_name, f"{model_name}_{version}.pkl")
+    model_path = os.path.join("src/model_output", model_name, f"{model_name}_{version}.pkl")
     assert os.path.exists(model_path), f"Expected model file {model_path} does not exist."
 
 def test_load_model():

@@ -43,7 +43,7 @@ start_mlflow_ui() {
     export MLFLOW_TRACKING_URI="file://$(pwd)/data_science/mlruns"
 
     echo "Starting MLflow UI..."
-    cd data_science  # Change to the directory containing mlruns
+    cd data_science
     echo "The MLflow UI will be accessible at http://localhost:5000"
     mlflow ui --port 5000
 }
