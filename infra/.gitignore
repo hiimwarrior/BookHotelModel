@@ -1,3 +1,5 @@
 volumes/
 dbData/
 logs/
+
+terraform/terraform.tfvars
