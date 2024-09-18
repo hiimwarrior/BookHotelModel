@@ -1,5 +1,10 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+import os
+
+# Function to check if CSV file is empty
+def is_csv_empty(file_path: str) -> bool:
+    return not os.path.exists(file_path) or os.path.getsize(file_path) == 0
 
 # Function to check if table is empty in the database
 def is_table_empty(engine: Engine, table_name: str) -> bool:

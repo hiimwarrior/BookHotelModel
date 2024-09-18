@@ -5,10 +5,8 @@ def save_model(model, model_name, version):
     """
     Save the model to a .pkl file in the output folder.
     """
-    output_dir = os.path.join("model_output", model_name)
-    os.makedirs(output_dir, exist_ok=True)
-    model_path = os.path.join(output_dir, f"{model_name}_{version}.pkl")
-    
+    model_path = os.path.join("model_output", model_name, f"{model_name}_{version}.pkl")
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
     joblib.dump(model, model_path)
     print(f"Model saved to {model_path}")
 

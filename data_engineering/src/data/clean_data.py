@@ -3,6 +3,7 @@ import argparse
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 import os
+from src.utils.file import is_csv_empty
 
 # Function to process and clean data
 def process_data():
@@ -147,10 +148,6 @@ def is_table_empty(engine: Engine, table_name: str) -> bool:
         result = connection.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
         count = result.scalar()
     return count == 0
-
-# Function to check if CSV file is empty
-def is_csv_empty(file_path: str) -> bool:
-    return not os.path.exists(file_path) or os.path.getsize(file_path) == 0
 
 # Function to save data to MySQL database
 def save_to_db(df, db_url='mysql+pymysql://user:password@localhost:3307/hotel_booking_db', version='1'):
