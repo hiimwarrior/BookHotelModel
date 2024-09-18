@@ -1,15 +1,11 @@
-# TODO: Populate after architecture discussion
 output "instance_id" {
-  description = "The ID of the example EC2 instance"
-  value       = aws_instance.example.id
+  value = aws_instance.hotel_bookings_instance.id
 }
 
-output "instance_public_ip" {
-  description = "The public IP address of the example EC2 instance"
-  value       = aws_instance.example.public_ip
+output "s3_bucket_id" {
+  value = aws_s3_bucket.hotel_bookings_bucket.id
 }
 
-output "instance_private_ip" {
-  description = "The private IP address of the example EC2 instance"
-  value       = aws_instance.example.private_ip
+output "db_instance_endpoint" {
+  value = aws_db_instance.hotel_bookings_db.endpoint
 }
