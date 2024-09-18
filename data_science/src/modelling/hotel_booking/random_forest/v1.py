@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import mlflow
 import mlflow.sklearn
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
@@ -29,8 +30,93 @@ def run_random_forest_experiment(data_version, model_version):
 
     # Load and prepare data
     df = pd.read_csv(data_path)
-    X = df.drop('is_canceled', axis=1)
-    y = df['is_canceled']
+
+    df_transformado = df.astype({
+        'hotel': 'category',
+        'is_canceled': 'int64',
+        'lead_time': 'int64',
+        'arrival_date_year': 'category',
+        'arrival_date_month': 'category',
+        'arrival_date_week_number': 'int64',
+        'arrival_date_day_of_month': 'int64',
+        'stays_in_weekend_nights': 'int64',
+        'stays_in_week_nights': 'int64',
+        'adults': 'int64',
+        'children': 'int64',
+        'babies': 'int64',
+        'meal': 'category',
+        'country': 'category',
+        'market_segment': 'category',
+        'distribution_channel': 'category',
+        'is_repeated_guest': 'category',
+        'previous_cancellations': 'int64',
+        'previous_bookings_not_canceled': 'int64',
+        'reserved_room_type': 'category',
+        'assigned_room_type': 'category',
+        'booking_changes': 'int64',
+        'deposit_type': 'category',
+        'agent': 'category',
+        'company': 'category',
+        'days_in_waiting_list': 'int64',
+        'customer_type': 'category',
+        'adr': 'float',
+        'required_car_parking_spaces': 'int64',
+        'total_of_special_requests': 'int64',
+        'reservation_status': 'category',
+        'reservation_status_date': 'datetime64[ns]'
+    })
+    df_transformado.info()
+    df = df_transformado
+
+    df['reservation_status_date'] = pd.to_datetime(df['reservation_status_date'])
+
+    # Extraer características de fecha (año, mes, día)
+    df['reservation_year'] = df['reservation_status_date'].dt.year
+    df['reservation_month'] = df['reservation_status_date'].dt.month
+    df['reservation_day'] = df['reservation_status_date'].dt.day
+
+    # Ahora podemos eliminar la columna de fecha original si ya no es necesaria
+    df.drop('reservation_status_date', axis=1, inplace=True)
+
+    df.drop('arrival_date', axis=1, inplace=True)
+    df.drop('arrival_day_of_week', axis=1, inplace=True)
+    df.drop('arrival_month', axis=1, inplace=True)
+    df.drop('season', axis=1, inplace=True)
+    df.drop('is_weekend', axis=1, inplace=True)
+    df.drop('total_nights', axis=1, inplace=True)
+    df.drop('customer_type_cancellation_rate', axis=1, inplace=True)
+    df.drop('avg_adr_for_room_type', axis=1, inplace=True)
+    df.drop('total_guests', axis=1, inplace=True)
+    df.drop('room_season', axis=1, inplace=True)
+    df.drop('customer_season', axis=1, inplace=True)
+    df.drop('booking_date', axis=1, inplace=True)
+    df.drop('booking_to_arrival_weeks', axis=1, inplace=True)
+    df.drop('is_last_minute', axis=1, inplace=True)
+    df.drop('total_special_requests', axis=1, inplace=True)
+    df.drop('is_high_season', axis=1, inplace=True)
+
+    # Identificar las columnas categóricas que deben ser codificadas
+    categorical_cols = ['hotel', 'arrival_date_year', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'is_repeated_guest', 'market_segment', 
+                        'customer_type', 'reserved_room_type', 'assigned_room_type','deposit_type','agent','company','reservation_status']
+
+    # Aplicar OneHotEncoding a las columnas categóricas usando get_dummies()
+    df_encoded = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
+
+    # Verificar que no hay variables categóricas sin codificar
+    # print(df_encoded.dtypes)
+
+    # Identificar columnas numéricas
+    numerical_cols = ['arrival_date_week_number','arrival_date_day_of_month','stays_in_weekend_nights','stays_in_week_nights',
+                    'adults','children','babies','previous_cancellations','previous_bookings_not_canceled','booking_changes',
+                    'days_in_waiting_list','adr','required_car_parking_spaces','total_of_special_requests']
+
+    # Escalar las variables numéricas
+    scaler = StandardScaler()
+    df_encoded[numerical_cols] = scaler.fit_transform(df_encoded[numerical_cols])
+
+
+    X = df_encoded.drop('is_canceled', axis=1)
+    y = df_encoded['is_canceled']
 
     # Split the data into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
