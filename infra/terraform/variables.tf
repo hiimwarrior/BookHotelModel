@@ -1,15 +1,30 @@
-# TODO: Populate after architecture discussion
-variable "aws_region" {
-  description = "The AWS region to deploy resources in"
-  type        = string
+variable "region" {
+  description = "AWS region"
+  default     = "us-west-2"
 }
 
 variable "db_username" {
-  description = "The username for the database"
+  description = "Database username"
   type        = string
 }
 
 variable "db_password" {
-  description = "The password for the database"
+  description = "Database password"
   type        = string
+  sensitive   = true
+}
+
+variable "bucket_name" {
+  description = "S3 bucket name"
+  type        = string
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  default     = "db.t3.medium"
+}
+
+variable "db_name" {
+  description = "RDS database name"
+  default     = "hotelbookingsdb"
 }
